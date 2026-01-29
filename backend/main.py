@@ -1657,8 +1657,6 @@ async def execute_cmbagent_task(websocket: WebSocket, task_id: str, task: str, c
                     )
                 elif mode == "ocr":
                     # OCR mode - process PDFs with Mistral OCR
-                    import os
-                    
                     # task should be the path to PDF file or folder
                     pdf_path = task.strip()
                     
