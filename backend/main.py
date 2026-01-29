@@ -1365,6 +1365,8 @@ def _build_denario_params(config: dict) -> dict:
         "Idea module": {
             "idea_sampler": entry(default, 1.0),
             "idea_selector1": entry(default),
+            "idea_selector2": entry(default),
+            "idea_selector3": entry(default),
             "idea_chooser": entry(default),
             "idea_maker": entry(config.get("ideaMakerModel", default), 1.0),
             "idea_hater": entry(config.get("ideaHaterModel", formatter)),
@@ -1377,6 +1379,8 @@ def _build_denario_params(config: dict) -> dict:
             "methods": entry(default),
             "improver": entry(default),
             "reviewer1": entry(formatter),
+            "reviewer2": entry(formatter),
+            "reviewer3": entry(formatter),
         },
         "Paper module": {
             "section_writer": entry(default),
@@ -1385,7 +1389,15 @@ def _build_denario_params(config: dict) -> dict:
         "Reviewer module": {
             "reviewer1": entry(default),
             "reviewer2": entry(default),
+            "reviewer3": entry(default),
             "meta_reviewer": entry(default),
+        },
+        "Evaluator module": {
+            "reporter": entry(default),
+            "idea_reviewer": entry(default),
+            "methods_reviewer": entry(default),
+            "input_reviewer": entry(default),
+            "new_iteration_reviewer": entry(default),
         },
     }
 
@@ -1498,12 +1510,6 @@ async def execute_cmbagent_task(websocket: WebSocket, task_id: str, task: str, c
         agent = config.get("agent", "engineer")
         default_formatter_model = config.get("defaultFormatterModel", "o3-mini-2025-01-31")
         default_llm_model = config.get("defaultModel", "gpt-4.1-2025-04-14")
-        
-        # Debug: Log the received config
-        print(f"DEBUG: Received config: {config}")
-        print(f"DEBUG: defaultModel = {default_llm_model}")
-        print(f"DEBUG: defaultFormatterModel = {default_formatter_model}")
-
         
         # Planning & Control specific parameters
         planner_model = config.get("plannerModel", "gpt-4.1-2025-04-14")
@@ -1714,11 +1720,7 @@ async def execute_cmbagent_task(websocket: WebSocket, task_id: str, task: str, c
                     project_name = config.get("projectName", "default")
                     project_dir = _get_denario_project_dir(work_dir, project_name)
                     project_iteration = config.get("projectIteration", 0)
-                    print(f"Denario idea-fast: project_dir={project_dir}")
                     _save_data_description(project_dir, task, project_iteration)
-                    # Verify the file was written
-                    expected_file = os.path.join(project_dir, f"Iteration{project_iteration}", "input_files", "data_description.md")
-                    print(f"Data description file exists: {os.path.exists(expected_file)} at {expected_file}")
                     results = idea_LG(
                         project_dir=project_dir,
                         keys=_build_denario_keys(),
