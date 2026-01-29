@@ -47,7 +47,7 @@ WORKDIR /app
 # Copy Python requirements and install dependencies
 COPY pyproject.toml ./
 COPY cmbagent/ ./cmbagent/
-RUN pip install --no-cache-dir -e .
+RUN pip install --no-cache-dir -e ".[server]"
 
 # Copy backend
 COPY backend/ ./backend/

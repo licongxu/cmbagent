@@ -23,12 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY pyproject.toml README.md ./
 COPY cmbagent/ ./cmbagent/
 
-# Install cmbagent package (core only, no scientific packages needed)
-RUN pip install -e .
-
-# Copy backend-specific requirements and install
-COPY backend/requirements.txt ./backend/
-RUN pip install -r backend/requirements.txt
+# Install cmbagent package with server dependencies
+RUN pip install -e ".[server]"
 
 # Copy backend code
 COPY backend/*.py ./backend/
