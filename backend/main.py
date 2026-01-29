@@ -1205,6 +1205,25 @@ async def sync_backend_files_to_frontend(
                 logger.info(f"Syncing special file: {rel_path}")
                 await sync_file(file_path, rel_path)
 
+    # Sync OCR-specific files and directories
+    if mode == 'ocr':
+        # Sync ocr_cost.json
+        ocr_cost_file = os.path.join(work_dir, 'ocr_cost.json')
+        if os.path.exists(ocr_cost_file):
+            logger.info("Syncing ocr_cost.json")
+            await sync_file(ocr_cost_file, 'ocr_cost.json')
+
+        # Sync all *_processed directories (OCR output directories)
+        for item in os.listdir(work_dir):
+            item_path = os.path.join(work_dir, item)
+            if os.path.isdir(item_path) and item.endswith('_processed'):
+                logger.info(f"Syncing OCR output directory: {item}/")
+                for root, _, files in os.walk(item_path):
+                    for filename in files:
+                        file_path = os.path.join(root, filename)
+                        relative_path = os.path.relpath(file_path, work_dir)
+                        await sync_file(file_path, relative_path)
+
     if files_synced > 0:
         logger.info(f"Synced {files_synced} files from backend to frontend (mode={mode})")
         await websocket.send_json({
