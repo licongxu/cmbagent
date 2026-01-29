@@ -11,6 +11,11 @@ from typing import Dict, Any, Optional, List
 import uuid
 import mimetypes
 
+from dotenv import load_dotenv
+
+# Load .env before any cmbagent imports (they read env vars at import time)
+load_dotenv()
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
