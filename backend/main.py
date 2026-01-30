@@ -1729,46 +1729,25 @@ async def execute_cmbagent_task(websocket: WebSocket, task_id: str, task: str, c
                         project_iteration=config.get("projectIteration", 0),
                     )
                 elif mode == "idea":
-                    # Planning & Control idea generation via cmbagent.deep_research
-                    import re as _re
-                    from denario.cmbagent_agents.prompts.idea import idea_planner_prompt
+                    # Planning & Control idea generation via Denario Idea class
+                    from denario.cmbagent_agents.idea import Idea
                     project_name = config.get("projectName", "default")
                     project_dir = _get_denario_project_dir(work_dir, project_name)
                     project_iteration = config.get("projectIteration", 0)
                     _save_data_description(project_dir, task, project_iteration)
                     working_dir = os.path.join(project_dir, f"Iteration{project_iteration}")
-                    idea_work_dir = os.path.join(working_dir, "idea")
                     os.makedirs(os.path.join(working_dir, "input_files"), exist_ok=True)
-                    os.makedirs(idea_work_dir, exist_ok=True)
-                    results = cmbagent.deep_research(
-                        task=task,
-                        max_plan_steps=6,
-                        n_plan_reviews=1,
+                    idea = Idea(
+                        keys=_build_denario_keys(),
+                        work_dir=working_dir,
                         idea_maker_model=config.get("ideaMakerModel", "gpt-4o"),
                         idea_hater_model=config.get("ideaHaterModel", "o3-mini"),
                         planner_model=config.get("ideaPlannerModel", "gpt-4o"),
                         plan_reviewer_model=config.get("ideaPlanReviewerModel", "o3-mini"),
-                        plan_instructions=idea_planner_prompt,
-                        work_dir=idea_work_dir,
-                        api_keys=api_keys,
-                        clear_work_dir=False,
-                        default_llm_model=config.get("ideaOrchestrationModel", "gpt-4.1"),
-                        default_formatter_model=config.get("ideaFormatterModel", "o3-mini"),
+                        orchestration_model=config.get("ideaOrchestrationModel", "gpt-4.1"),
+                        formatter_model=config.get("ideaFormatterModel", "o3-mini"),
                     )
-                    # Extract idea from chat history
-                    chat_history = results.get('chat_history', [])
-                    idea_text = ""
-                    for msg in reversed(chat_history):
-                        if msg.get('name') == 'idea_maker_nest':
-                            idea_text = msg.get('content', '')
-                            break
-                    if idea_text:
-                        idea_text = _re.sub(
-                            r'\*\*Ideas\*\*\s*\n- Idea 1:',
-                            'Project Idea:',
-                            idea_text,
-                        )
-                    # Write idea to file
+                    idea_text = idea.develop_idea(task)
                     idea_path = os.path.join(working_dir, "input_files", "idea.md")
                     with open(idea_path, 'w') as f:
                         f.write(idea_text)
@@ -1798,11 +1777,8 @@ async def execute_cmbagent_task(websocket: WebSocket, task_id: str, task: str, c
                         project_iteration=config.get("projectIteration", 0),
                     )
                 elif mode == "methods":
-                    # Planning & Control methods generation via cmbagent.deep_research
-                    import re as _re
-                    from denario.cmbagent_agents.prompts.method import (
-                        method_planner_prompt, method_researcher_prompt
-                    )
+                    # Planning & Control methods generation via Denario Method class
+                    from denario.cmbagent_agents.method import Method
                     project_name = config.get("projectName", "default")
                     project_dir = _get_denario_project_dir(work_dir, project_name)
                     project_iteration = config.get("projectIteration", 0)
@@ -1810,8 +1786,6 @@ async def execute_cmbagent_task(websocket: WebSocket, task_id: str, task: str, c
                         _save_data_description(project_dir, task, project_iteration)
                     working_dir = os.path.join(project_dir, f"Iteration{project_iteration}")
                     input_dir = os.path.join(working_dir, "input_files")
-                    methods_work_dir = os.path.join(working_dir, "methods")
-                    os.makedirs(methods_work_dir, exist_ok=True)
                     # Read idea and data description from previous steps
                     idea_path = os.path.join(input_dir, "idea.md")
                     with open(idea_path, 'r') as f:
@@ -1819,37 +1793,17 @@ async def execute_cmbagent_task(websocket: WebSocket, task_id: str, task: str, c
                     desc_path = os.path.join(input_dir, "data_description.md")
                     with open(desc_path, 'r') as f:
                         data_description = f.read()
-                    results = cmbagent.deep_research(
-                        task=data_description,
-                        max_plan_steps=4,
-                        max_n_attempts=4,
-                        n_plan_reviews=1,
+                    method = Method(
+                        research_idea=research_idea,
+                        keys=_build_denario_keys(),
+                        work_dir=working_dir,
                         researcher_model=config.get("methodsGeneratorModel", "gpt-4.1-2025-04-14"),
                         planner_model=config.get("methodsPlannerModel", "gpt-4o"),
-                        plan_reviewer_model=config.get("methodsPlanReviewerModel", "gpt-4.1"),
-                        plan_instructions=method_planner_prompt.format(research_idea=research_idea),
-                        researcher_instructions=method_researcher_prompt.format(research_idea=research_idea),
-                        work_dir=methods_work_dir,
-                        api_keys=api_keys,
-                        clear_work_dir=False,
-                        default_llm_model=config.get("methodsOrchestrationModel", "gpt-4.1"),
-                        default_formatter_model=config.get("methodsFormatterModel", "o3-mini"),
+                        plan_reviewer_model=config.get("methodsPlanReviewerModel", "o3-mini"),
+                        orchestration_model=config.get("methodsOrchestrationModel", "gpt-4.1"),
+                        formatter_model=config.get("methodsFormatterModel", "o3-mini"),
                     )
-                    # Extract methodology from chat history
-                    chat_history = results.get('chat_history', [])
-                    methodology = ""
-                    for msg in reversed(chat_history):
-                        if msg.get('name') == 'researcher_response_formatter':
-                            methodology = msg.get('content', '')
-                            break
-                    if methodology:
-                        # Extract markdown from code block if present
-                        md_pattern = r"```[ \t]*(?:markdown)[ \t]*\r?\n(.*)\r?\n[ \t]*```"
-                        matches = _re.findall(md_pattern, methodology, flags=_re.DOTALL)
-                        if matches:
-                            methodology = matches[0]
-                            methodology = _re.sub(r'^<!--.*?-->\s*\n', '', methodology)
-                    # Write methods to file
+                    methodology = method.develop_method(data_description)
                     methods_path = os.path.join(input_dir, "methods.md")
                     with open(methods_path, 'w') as f:
                         f.write(methodology)
