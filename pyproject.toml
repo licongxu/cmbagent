@@ -113,5 +113,11 @@ GitHub = "https://github.com/CMBAgents/cmbagent"
 [tool.setuptools.packages.find]
 exclude = ["output"]
 
+[dependency-groups]
+dev = [
+    "nbstripout>=0.9.0",
+    "pre-commit>=4.5.1",
+]
+
 [project.scripts]
 cmbagent = "cmbagent.cli:main"
