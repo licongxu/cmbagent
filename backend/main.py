@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 # Load .env before any cmbagent imports (they read env vars at import time)
 load_dotenv()
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, UploadFile, File, Form
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, UploadFile, File, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -56,7 +56,7 @@ CMBAGENT_WORK_DIR = os.environ.get("CMBAGENT_WORK_DIR", "/tmp/cmbagent_workdir")
 
 # Import auth and execution tracking modules
 try:
-    from auth import verify_ws_token, User, LocalDevUser, is_local_dev
+    from auth import verify_ws_token, get_current_user, User, LocalDevUser, is_local_dev
     from execution_tracker import execution_tracker, task_tracker
     from models import ExecutionStatus, TaskStatus
     REMOTE_EXECUTION_ENABLED = True
@@ -485,6 +485,111 @@ async def serve_image(path: str):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error serving image: {str(e)}")
+
+# Denario project sync endpoints
+
+@app.get("/api/denario/project-manifest")
+async def denario_project_manifest(
+    project_name: str = Query(...),
+    iteration: int = Query(default=0),
+    user: "User" = Depends(get_current_user),
+):
+    """Return a lightweight manifest of files in a Denario project's persistent directory."""
+    try:
+        user_id = user.uid or "anonymous"
+        project_dir = os.path.join(CMBAGENT_WORK_DIR, user_id, "denario", project_name)
+
+        if not os.path.exists(project_dir):
+            return {
+                "project_name": project_name,
+                "iteration": iteration,
+                "files": [],
+                "total_files": 0,
+            }
+
+        files = []
+        for root, _, filenames in os.walk(project_dir):
+            for fname in filenames:
+                if fname.startswith('.'):
+                    continue
+                full_path = os.path.join(root, fname)
+                rel_path = os.path.relpath(full_path, project_dir)
+                stat = os.stat(full_path)
+                files.append({
+                    "relative_path": rel_path,
+                    "size": stat.st_size,
+                    "mtime": stat.st_mtime,
+                })
+
+        return {
+            "project_name": project_name,
+            "iteration": iteration,
+            "files": files,
+            "total_files": len(files),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading project manifest: {str(e)}")
+
+
+@app.get("/api/denario/project-files")
+async def denario_project_files(
+    project_name: str = Query(...),
+    user: "User" = Depends(get_current_user),
+):
+    """Return all file contents from a Denario project's persistent directory."""
+    import base64
+
+    try:
+        user_id = user.uid or "anonymous"
+        project_dir = os.path.join(CMBAGENT_WORK_DIR, user_id, "denario", project_name)
+
+        if not os.path.exists(project_dir):
+            return {
+                "project_name": project_name,
+                "files": [],
+                "total_files": 0,
+            }
+
+        files = []
+        for root, _, filenames in os.walk(project_dir):
+            for fname in filenames:
+                if fname.startswith('.'):
+                    continue
+                full_path = os.path.join(root, fname)
+                rel_path = os.path.relpath(full_path, project_dir)
+                file_size = os.path.getsize(full_path)
+
+                # Skip files larger than 10MB
+                if file_size > 10 * 1024 * 1024:
+                    continue
+
+                try:
+                    with open(full_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    files.append({
+                        "relative_path": rel_path,
+                        "content": content,
+                        "encoding": "utf-8",
+                        "size": file_size,
+                    })
+                except UnicodeDecodeError:
+                    with open(full_path, 'rb') as f:
+                        content = base64.b64encode(f.read()).decode('ascii')
+                    files.append({
+                        "relative_path": rel_path,
+                        "content": content,
+                        "encoding": "base64",
+                        "size": file_size,
+                    })
+
+        return {
+            "project_name": project_name,
+            "files": files,
+            "total_files": len(files),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading project files: {str(e)}")
+
 
 # API Credentials endpoints
 @app.get("/api/credentials/test-all")
