@@ -1803,6 +1803,7 @@ async def execute_cmbagent_task(websocket: WebSocket, task_id: str, task: str, c
                     idea_path = os.path.join(working_dir, "input_files", "idea.md")
                     with open(idea_path, 'w') as f:
                         f.write(idea_text)
+                    results = {"idea": idea_text}
                 elif mode == "literature-search":
                     from denario.langgraph_agents.modules import literature_LG
                     project_name = config.get("projectName", "default")
@@ -1859,6 +1860,7 @@ async def execute_cmbagent_task(websocket: WebSocket, task_id: str, task: str, c
                     methods_path = os.path.join(input_dir, "methods.md")
                     with open(methods_path, 'w') as f:
                         f.write(methodology)
+                    results = {"methodology": methodology}
                 elif mode == "paper":
                     from denario.langgraph_agents.modules import paper_LG
                     from denario.tools import Journal
