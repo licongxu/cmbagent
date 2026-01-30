@@ -8,6 +8,7 @@ import os
 import json
 import time
 import datetime
+from pathlib import Path
 
 from ..utils import (
     work_dir_default,
@@ -135,7 +136,7 @@ def get_keywords_from_aaai(
     from ..cmbagent import CMBAgent
 
     start_time = time.time()
-    cmbagent = CMBAgent(work_dir=work_dir, api_keys=api_keys)
+    cmbagent = CMBAgent(work_dir=Path(work_dir), api_keys=api_keys)
     end_time = time.time()
     initialization_time = end_time - start_time
 
@@ -227,7 +228,7 @@ def get_keywords_from_string(
     from ..cmbagent import CMBAgent
 
     start_time = time.time()
-    cmbagent = CMBAgent(work_dir=work_dir, api_keys=api_keys)
+    cmbagent = CMBAgent(work_dir=Path(work_dir), api_keys=api_keys)
     end_time = time.time()
     initialization_time = end_time - start_time
 
@@ -313,7 +314,7 @@ def get_aas_keywords(
     from ..cmbagent import CMBAgent
 
     start_time = time.time()
-    cmbagent = CMBAgent(work_dir=work_dir, api_keys=api_keys)
+    cmbagent = CMBAgent(work_dir=Path(work_dir), api_keys=api_keys)
     end_time = time.time()
     initialization_time = end_time - start_time
 
