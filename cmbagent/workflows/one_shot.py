@@ -128,7 +128,7 @@ def one_shot(
     if api_keys is None:
         api_keys = get_api_keys_from_env()
 
-    engineer_config = get_model_config(engineer_model, api_keys)
+    engineer_config = engineer_model if isinstance(engineer_model, dict) else get_model_config(engineer_model, api_keys)
     researcher_config = get_model_config(researcher_model, api_keys)
     camb_context_config = get_model_config(camb_context_model, api_keys)
 

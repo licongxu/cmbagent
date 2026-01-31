@@ -296,11 +296,15 @@ class CMBAgent:
         self.agent_llm_configs.update(agent_llm_configs)
 
         if api_keys is not None:
+            # Preserve config if it already has base_url (e.g. local LLM)
+            if "base_url" not in self.llm_config["config_list"][0]:
+                self.llm_config["config_list"][0] = get_model_config(self.llm_config["config_list"][0]["model"], api_keys)
 
-            self.llm_config["config_list"][0] = get_model_config(self.llm_config["config_list"][0]["model"], api_keys)
-            
-            for agent in self.agent_llm_configs.keys():                
-                self.agent_llm_configs[agent] = get_model_config(self.agent_llm_configs[agent]["model"], api_keys)
+            for agent in self.agent_llm_configs.keys():
+                cfg = self.agent_llm_configs[agent]
+                if isinstance(cfg, dict) and "base_url" in cfg:
+                    continue  # keep full/local config as-is
+                self.agent_llm_configs[agent] = get_model_config(cfg["model"], api_keys)
 
 
         self.api_keys = api_keys

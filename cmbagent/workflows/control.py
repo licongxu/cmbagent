@@ -175,7 +175,7 @@ def control(
         api_keys = get_api_keys_from_env()
 
     ## control
-    engineer_config = get_model_config(engineer_model, api_keys)
+    engineer_config = engineer_model if isinstance(engineer_model, dict) else get_model_config(engineer_model, api_keys)
     researcher_config = get_model_config(researcher_model, api_keys)
     idea_maker_config = get_model_config(idea_maker_model, api_keys)
     idea_hater_config = get_model_config(idea_hater_model, api_keys)

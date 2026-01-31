@@ -143,12 +143,26 @@ def get_api_keys_from_env():
     return api_keys
 
 def get_model_config(model, api_keys):
+    # Allow passing a full config dict (e.g. for local LLM with base_url)
+    if isinstance(model, dict):
+        return model
+
     config = {
         "model": model,
         "api_key": None,
         "api_type": None
     }
-    
+
+    # Local LLM: use LOCAL_LLM_BASE_URL if set (e.g. http://localhost:8010/v1)
+    local_base_url = os.getenv("LOCAL_LLM_BASE_URL")
+    if local_base_url:
+        config.update({
+            "base_url": local_base_url.rstrip("/"),
+            "api_key": os.getenv("LOCAL_LLM_API_KEY", "EMPTY"),
+            "api_type": "openai",
+        })
+        return config
+
     if 'o3' in model:
         config.update({
             "reasoning_effort": "medium",
