@@ -6,6 +6,10 @@ Simple script to run the CMBAgent backend server
 import uvicorn
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env before uvicorn imports main.py (which reads env vars at import time)
+load_dotenv()
 
 # Add the parent directory to the path to import cmbagent
 sys.path.append(str(Path(__file__).parent.parent))

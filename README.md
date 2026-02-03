@@ -1,6 +1,6 @@
 # cmbagent
 
-[![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE) [![arXiv](https://img.shields.io/badge/arXiv-2507.07257-b31b1b.svg)](https://arxiv.org/abs/2507.07257) [![HuggingFace](https://img.shields.io/badge/HuggingFace-Space-blue)](https://huggingface.co/spaces/astropilot-ai/cmbagent)
+[![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE) [![arXiv](https://img.shields.io/badge/arXiv-2507.07257-b31b1b.svg)](https://arxiv.org/abs/2507.07257)
 [![PyPI version](https://img.shields.io/pypi/v/cmbagent.svg)](https://pypi.org/project/cmbagent/)
 
 <a href="https://www.youtube.com/@cmbagent" target="_blank">
@@ -11,14 +11,12 @@
     <img src="https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white&style=flat-square" alt="Join us on Discord" width="140"/>
 </a>
 
-Multi-Agent System for Science, Powered by [AG2](https://github.com/ag2ai/ag2).
+Autonomous Research Backend, Powered by [AG2](https://github.com/ag2ai/ag2).
 
-🎉 **News**: Cmbagent won a **first place award** at the **NeurIPS 2025 [Fair Universe Competition](https://fair-universe.lbl.gov/)**. 
+🎉 **News**: Cmbagent won a **first place award** at the **NeurIPS 2025 [Fair Universe Competition](https://fair-universe.lbl.gov/)**.
 
 
-Cmbagent is part of [Denario](https://astropilot-ai.github.io/DenarioPaperPage/), our end-to-end research system.
-
-Try cmbagent on [HuggingFace](https://huggingface.co/spaces/astropilot-ai/cmbagent)!
+Cmbagent is the autonomous research backend for [Denario](https://astropilot-ai.github.io/DenarioPaperPage/), our end-to-end research system.
 
 We are currently deploying cmbagent on the cloud, it will be in production soon!
 
@@ -62,18 +60,38 @@ source cmbagent_env/bin/activate
 pip install cmbagent
 ```
 
-Go ahead and launch the Streamlit GUI:
+Go ahead and launch the Next.js web UI:
 
 ```bash
 cmbagent run
 ```
 
-See below for other options including the Next.js web UI, terminal usage, notebooks etc.
+See below for other options including terminal usage, notebooks etc.
 
-To install additional astrophysics,computation and data science python packages, you can install cmbagent with
+### Lightweight Architecture
+
+The base `pip install cmbagent` is **lightweight** - it includes only orchestration dependencies (AG2, FastAPI, LLM clients). Heavy scientific packages (numpy, scipy, matplotlib, etc.) are **not required** on the server because code execution happens on the **frontend** (your local machine) via remote executor. Packages are installed on-demand by the installer agent into an isolated virtual environment.
+
+### Optional Dependencies
 
 ```bash
-pip install cmbagent[astro,data]
+# Development tools (pytest, ipython, jupyter)
+pip install cmbagent[dev]
+
+# Local execution (if not using the web UI)
+pip install cmbagent[local]
+
+# Domain-specific packages (for specialized agents or local execution)
+pip install cmbagent[materials]  # pymatgen, ASE, phonopy, matminer
+pip install cmbagent[biochem]    # BioPython, RDKit, MDAnalysis, ProDy
+pip install cmbagent[astro]      # CAMB, AstroPy, HEALPix, Cobaya
+pip install cmbagent[data]       # scipy, scikit-learn, seaborn, plotly
+
+# Everything
+pip install cmbagent[all]
+
+# Or combine multiple domains
+pip install cmbagent[materials,biochem,data]
 ```
 
 ## Installation for developers
@@ -88,10 +106,17 @@ pip install -e .
 
 You can then open the folder in your VSCode/Cursor/Emacs/... and work on the source code.
 
-To install the optional astrophysics and/or data science packages, install with
+To install optional domain-specific packages (examples provided, add your own in `pyproject.toml`):
 
 ```bash
-pip install -e .[astro,data]
+# Single domain
+pip install -e .[materials]
+pip install -e .[biochem]
+pip install -e .[astro]
+pip install -e .[data]
+
+# Or combine multiple domains
+pip install -e .[materials,biochem,data]
 ```
 
 ## Run
@@ -137,65 +162,42 @@ For Windows, use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) an
 
 By default, cmbagent uses models from oai/anthropic/google. If you want to pick different LLMs, just adapt `agent_llm_configs` as above, or the `default_agent_llm_configs` in [utils.py](https://github.com/CMBAgents/cmbagent/blob/main/cmbagent/utils.py).
 
-## CMBAgent UI - Local Development
+## CMBAgent UI
 
-To launch the Next.js web interface locally:
+The web interface is maintained in a separate repository: **[cmbagent-ui](https://github.com/CMBAgents/cmbagent-ui)**
 
-**Prerequisites:**
+### Quick Start
 
-- Node.js (v18+)
-- Python 3.12+
-- API keys set as environment variables (OpenAI required, others optional)
-
-**Quick Start (One Command):**
-
-First activate your virtual environment, then launch both backend and frontend:
-
-```bash
-cd cmbagent
-source your_venv/bin/activate  # Activate your virtual environment first
-./start-cmbagent.sh
-```
-
-This script will:
-
-- **Start the FastAPI backend server** (port 8000)
-- **Start the Next.js frontend** (with auto-browser opening)
-- **Handle cleanup** when you press Ctrl+C
-
-**Manual Setup (Two Terminals):**
-
-If you prefer to run servers separately, first activate your virtual environment:
-
-```bash
-cd cmbagent
-source your_venv/bin/activate  # Activate your virtual environment
-pip install -e .               # Install CMBAgent dependencies
-```
-
-Then in separate terminals:
-
-1. **Backend (FastAPI server) - Terminal 1:**
-
+1. **Start the backend** (this repo):
 ```bash
 cd cmbagent/backend
+source your_venv/bin/activate
 python run.py
 ```
 
-2. **Frontend (Next.js) - Terminal 2:**
-
+2. **Start the frontend** (separate repo):
 ```bash
+git clone https://github.com/CMBAgents/cmbagent-ui.git
 cd cmbagent-ui
 npm install
 npm run dev
 ```
 
-3. **Access the UI:**
-   The browser will open automatically, or go to http://localhost:3000
+3. **Access the UI** at http://localhost:3000
 
-The UI supports three execution modes: One Shot, Planning & Control, and Idea Generation.
+The UI supports multiple execution modes: One Shot, Planning & Control, Idea Generation, OCR, and more.
+
+### Architecture
+
+CMBAgent uses a **remote execution architecture**:
+- **Backend**: Lightweight orchestration - runs AI agents, generates code, manages conversations
+- **Frontend**: Executes generated code locally in an isolated Python virtual environment
+
+This means scientific computation happens on your local machine with full access to your data, while the backend can be deployed on minimal infrastructure.
 
 ## Docker
+
+> **Note:** Docker configuration is being updated following the separation of the UI into its own repository. See [cmbagent-ui](https://github.com/CMBAgents/cmbagent-ui) for the latest frontend Docker setup.
 
 ### CMBAgent UI (Next.js) with Docker
 
@@ -252,11 +254,6 @@ docker buildx build --platform linux/amd64,linux/arm64 \
   -f Dockerfile.nextjs \
   -t docker.io/yourusername/cmbagent-ui:latest \
   --no-cache --push .
-
-# Build and push original Streamlit image (AMD64 only)
-docker buildx build --platform linux/amd64 \
-  -t docker.io/yourusername/cmbagent:latest \
-  --no-cache --push .
 ```
 
 Replace `yourusername` with your Docker Hub username. The `--platform` flag ensures compatibility across different architectures (Intel/AMD and ARM).
@@ -292,143 +289,6 @@ Access the UI at:
 - Backend API: http://localhost:8000
 
 **Note:** API keys are **not** included in the Docker image for security reasons. Each user must provide their own credentials at container runtime.
-
-### Streamlit GUI with Docker
-
-You can also run the original cmbagent Streamlit GUI in a [docker container](https://www.docker.com/). You may need `sudo` permission to run docker, [or follow the instructions of this link](https://docs.docker.com/engine/install/linux-postinstall/).
-
-**Building and running locally:**
-
-```bash
-# Build the image
-docker build -t cmbagent .
-
-# Run the Streamlit GUI
-docker run -p 8501:8501 \
-  -e OPENAI_API_KEY="sk-..." \
-  -e ANTHROPIC_API_KEY="sk-..." \
-  -v /path/to/service-account-key.json:/app/service-account-key.json \
-  -e GOOGLE_APPLICATION_CREDENTIALS="/app/service-account-key.json" \
-  --rm cmbagent
-```
-
-**Using published image:**
-
-```bash
-# Pull and run from Docker Hub
-docker pull docker.io/yourusername/cmbagent:latest
-
-docker run -p 8501:8501 \
-  -e OPENAI_API_KEY="your-openai-key-here" \
-  -e ANTHROPIC_API_KEY="your-anthropic-key-here" \
-  -v /path/to/service-account-key.json:/app/service-account-key.json \
-  -e GOOGLE_APPLICATION_CREDENTIALS="/app/service-account-key.json" \
-  --rm docker.io/yourusername/cmbagent:latest
-```
-
-Access the Streamlit GUI at http://localhost:8501
-
-**Interactive container access:**
-
-```bash
-docker run --rm -it cmbagent bash
-```
-
-## Hugging Face Spaces Deployment
-
-Deploy CMBAgent with the Next.js UI to Hugging Face Spaces for public access. The UI will be available at https://huggingface.co/spaces/astropilot-ai/cmbagent.
-
-### Prerequisites
-
-1. **Hugging Face Account**: Sign up at https://huggingface.co
-2. **Create a Space**:
-   - Go to https://huggingface.co/new-space
-   - Choose "Docker" as the SDK
-   - Set visibility (public/private)
-
-### Deployment Steps
-
-1. **Clone your Hugging Face Space repository:**
-
-```bash
-git clone https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME
-cd YOUR_SPACE_NAME
-```
-
-2. **Copy CMBAgent files to the Space:**
-
-```bash
-# Copy the entire CMBAgent repository
-cp -r /path/to/cmbagent/* .
-
-# Or clone directly into the space directory
-git clone https://github.com/CMBAgents/cmbagent.git .
-```
-
-3. **Ensure the Dockerfile is configured for Hugging Face:**
-   The main `Dockerfile` is already configured for Hugging Face Spaces with:
-
-- Port 7860 (Hugging Face standard)
-- Multi-stage build (Node.js frontend + Python backend)
-- Combined service startup script
-
-4. **Create a README.md for your Space** (optional):
-
-```bash
----
-title: CMBAgent
-emoji: 🌌
-colorFrom: blue
-colorTo: purple
-sdk: docker
-pinned: false
----
-
-# CMBAgent - Multi-Agent System for Science
-
-CMBAgent is a multi-agent system for autonomous scientific discovery, powered by AG2 (formerly AutoGen).
-
-Access the web interface below to:
-- Execute one-shot scientific tasks
-- Use planning & control for complex multi-step problems
-- Generate and evaluate scientific ideas
-
-For more information, visit: https://github.com/CMBAgents/cmbagent
-```
-
-5. **Configure environment variables** (if needed):
-
-   - Go to your Space settings on Hugging Face
-   - Add environment variables under "Repository secrets"
-   - **Note**: For public demos, users typically provide their own API keys via the UI
-
-6. **Push to Hugging Face:**
-
-```bash
-git add .
-git commit -m "Deploy CMBAgent Next.js UI to Hugging Face Spaces"
-git push origin main
-```
-
-7. **Monitor deployment:**
-   - Hugging Face will automatically build and deploy your Space
-   - Check the "Logs" tab for build progress
-   - The Space will be available at `https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME`
-
-### Important Notes
-
-- **API Keys**: The deployment doesn't include API keys. Users must provide their own OpenAI API key (required) and optionally Anthropic/Google keys through the web interface.
-- **Port Configuration**: The Dockerfile exposes port 7860, which is the standard for Hugging Face Spaces.
-- **Resource Limits**: Hugging Face Spaces have CPU/memory limits. For intensive tasks, consider upgrading to a paid tier.
-- **Auto-sleep**: Free Spaces go to sleep after inactivity. They wake up automatically when accessed.
-
-### Troubleshooting
-
-- **Build failures**: Check the Dockerfile paths and ensure all required files are included
-- **Runtime issues**: Monitor the Space logs for Python/Node.js errors
-- **Port issues**: Ensure the application listens on port 7860 (handled automatically by the Dockerfile)
-
-The deployed Space will provide the full CMBAgent experience with the modern Next.js interface, accessible to anyone with the link.
 
 ## References
 
