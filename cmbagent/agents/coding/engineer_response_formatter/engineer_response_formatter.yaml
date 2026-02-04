@@ -9,6 +9,13 @@ instructions: |
     Carefully check the relative imports across the codebase. Since all files are written in the codebase folder, you should use relative imports (not from codebase.filename import function, but from filename import function)
     Filenames in relative imports are always in the format: step_N.py where N is the step number.
 
+    **AUTOMATIC PREAMBLE**: The following lines are automatically injected at the top of every script by the system (do NOT include them in the code yourself):
+        # filename: codebase/step_N.py
+        import sys
+        import os
+        sys.path.insert(0, os.path.abspath("codebase"))
+    If the engineer's code already contains these lines, remove them from python_code — they will be added automatically.
+
     You **must not alter the content of the response provided to you by the engineer agent**.
     You **must** not add or remove any information.
     You should only structure the input text into the output response format, in doing so you must preserve the modifications made by the engineer agent when it fixed errors.

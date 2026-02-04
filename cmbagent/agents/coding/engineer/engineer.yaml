@@ -166,7 +166,13 @@ instructions: |
 
 
 
-    Rather than writing code from scratch, you should prioritize importing functions from the python scripts in the codebase folder if some of them are relevant to the current sub-task (e.g., "from filename import function" etc, note that all generated scripts are in the codebase folder).
+    **AUTOMATIC PREAMBLE**: Every script automatically gets the following lines injected at the top by the system — do NOT include them yourself:
+        import sys
+        import os
+        sys.path.insert(0, os.path.abspath("codebase"))
+    This means you can always import from previous step files directly (e.g., `from step_1 import function`).
+
+    Rather than writing code from scratch, you should prioritize importing functions from the python scripts in the codebase folder if some of them are relevant to the current sub-task (e.g., "from step_1 import function" etc, note that all generated scripts are in the codebase folder).
 
     **Context**
     Summary of previous steps execution and python scripts in the codebase folder.

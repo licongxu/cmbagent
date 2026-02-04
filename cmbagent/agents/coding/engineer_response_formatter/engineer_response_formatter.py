@@ -46,14 +46,25 @@ class EngineerResponseFormatterAgent(BaseAgent):
             else:
                 full_path = final_filename
 
-            comment_line = f"# filename: {full_path}"
+            # Preamble: filename comment + sys.path for codebase imports
+            preamble_lines = [
+                f"# filename: {full_path}",
+                "import sys",
+                "import os",
+                'sys.path.insert(0, os.path.abspath("codebase"))',
+            ]
+
             code_lines = self.python_code.splitlines()
 
-            if code_lines and code_lines[0].strip().startswith("# filename:"):
-                code_lines[0] = comment_line
-                updated_python_code = "\n".join(code_lines)
-            else:
-                updated_python_code = "\n".join([comment_line, self.python_code])
+            # Strip any existing preamble the LLM may have included
+            while code_lines and code_lines[0].strip() in (
+                "", "import sys", "import os",
+                'sys.path.insert(0, os.path.abspath("codebase"))',
+                "sys.path.insert(0, os.path.abspath('codebase'))",
+            ) or (code_lines and code_lines[0].strip().startswith("# filename:")):
+                code_lines.pop(0)
+
+            updated_python_code = "\n".join(preamble_lines + code_lines)
 
             response_parts = [f"**Code Explanation:**\n\n{self.code_explanation}"]
 

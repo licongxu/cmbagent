@@ -9,6 +9,11 @@ In first step write python script where you define a function that computes the 
 In second step evaluate the function you defined in the first step (import the function and call it), including profiling the execution time and memory usage.
     """
 
+    # task=r"""
+    # Analyse /Users/boris/Desktop/Stocks.csv file using pandas.
+    # and then plot relevant statistics.
+    # """
+
     results = cmbagent.deep_research(
         task,
         max_rounds_control=100,
@@ -16,7 +21,8 @@ In second step evaluate the function you defined in the first step (import the f
         max_n_attempts=2,
         max_plan_steps=2,
         # engineer_model="gemini-3-flash-preview",
-        engineer_model="gemini-2.5-flash",
+        # engineer_model="gemini-2.5-flash",
+        engineer_model="gpt-4.1",
         plan_reviewer_model="claude-sonnet-4-20250514",
         plan_instructions=r"""
 use engineer for the whole analysis. Plan must have 2 steps:
