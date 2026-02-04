@@ -129,6 +129,17 @@ GitHub = "https://github.com/CMBAgents/cmbagent"
 [tool.setuptools.packages.find]
 include = ["cmbagent", "cmbagent.*"]
 
+[project.scripts]
+cmbagent = "cmbagent.cli:main"
+
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 norecursedirs = ["legacy", ".ipynb_checkpoints"]
+
+
+[dependency-groups]
+dev = [
+    "nbstripout>=0.9.0",
+    "pre-commit>=4.5.1",
+]

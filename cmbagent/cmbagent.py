@@ -26,6 +26,7 @@ from .utils import (path_to_apis,path_to_agents, update_yaml_preserving_format, 
 
 from .hand_offs import register_all_hand_offs
 from .functions import register_functions_to_agents
+from .utils.utils import fetch_local_model_name
 from .workflows.one_shot import one_shot
 from .workflows.deep_research import deep_research
 from .workflows.human_in_the_loop import human_in_the_loop
@@ -299,6 +300,16 @@ class CMBAgent:
             # Preserve config if it already has base_url (e.g. local LLM)
             if "base_url" not in self.llm_config["config_list"][0]:
                 self.llm_config["config_list"][0] = get_model_config(self.llm_config["config_list"][0]["model"], api_keys)
+            else:
+                # If using local LM, update default formatter model
+                base_url = self.llm_config["config_list"][0]["base_url"]
+                api_key = self.llm_config["config_list"][0]["api_key"]
+                local_model = fetch_local_model_name(
+                    base_url=base_url,
+                    api_key=api_key,
+                )
+                default_formatter_model = local_model
+                self.logger.info(f"Defaulted formatter model to {default_formatter_model}")
 
             for agent in self.agent_llm_configs.keys():
                 cfg = self.agent_llm_configs[agent]
