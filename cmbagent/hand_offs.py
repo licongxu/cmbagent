@@ -103,20 +103,34 @@ def register_all_hand_offs(cmbagent_instance):
     # 4. MESSAGE HISTORY LIMITING - Use list + loop
     # ============================================================================
 
-    context_handling = TransformMessages(
-        transforms=[MessageHistoryLimiter(max_messages=1)]
+    # Formatter/recorder agents only need the last message
+    formatter_context = TransformMessages(
+        transforms=[MessageHistoryLimiter(max_messages=1)],
     )
 
-    # Agents that need message history limiting
     limited_history_agents = [
         'executor_response_formatter', 'planner_response_formatter', 'plan_recorder',
         'reviewer_response_formatter', 'review_recorder', 'researcher_response_formatter',
         'researcher_executor', 'idea_maker_response_formatter', 'idea_hater_response_formatter',
-        'summarizer_response_formatter'
+        'summarizer_response_formatter',
     ]
 
     for agent_name in limited_history_agents:
-        context_handling.add_to_agent(agents[agent_name].agent)
+        formatter_context.add_to_agent(agents[agent_name].agent)
+
+    # Controller: keep recent messages + first message (plan state is in context variables)
+    controller_context = TransformMessages(
+        transforms=[MessageHistoryLimiter(max_messages=5, keep_first_message=True)],
+    )
+    controller_context.add_to_agent(agents['controller'].agent)
+
+
+    # Controller: keep recent messages + first message (plan state is in context variables)
+    terminator_context = TransformMessages(
+        transforms=[MessageHistoryLimiter(max_messages=1)],
+    )
+    terminator_context.add_to_agent(agents['terminator'].agent)
+
 
     # ============================================================================
     # 6. NESTED CHATS - Helper function to reduce duplication

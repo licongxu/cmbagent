@@ -1,6 +1,0 @@
-# Backend dependencies are now managed in pyproject.toml under [server] extra.
-# Install with: pip install -e ".[server]"
-#
-# This file is kept for reference only.
-# For local dev that needs ipython:
-ipython

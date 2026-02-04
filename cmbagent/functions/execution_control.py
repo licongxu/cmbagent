@@ -31,8 +31,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxx
 """
 
         if context_variables["agent_for_sub_task"] == "engineer" or \
-           context_variables["agent_for_sub_task"] == "camb_context" or \
-           context_variables["agent_for_sub_task"] == "classy_context":
+           context_variables["agent_for_sub_task"] == "camb_context":
 
             if context_variables["n_attempts"] >= context_variables["max_n_attempts"]:
                 return ReplyResult(

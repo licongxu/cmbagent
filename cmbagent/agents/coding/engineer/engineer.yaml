@@ -169,7 +169,8 @@ instructions: |
     Rather than writing code from scratch, you should prioritize importing functions from the python scripts in the codebase folder if some of them are relevant to the current sub-task (e.g., "from filename import function" etc, note that all generated scripts are in the codebase folder).
 
     **Context**
-    Summary of previous steps execution and python scripts in the codebase folder:
+    Summary of previous steps execution and python scripts in the codebase folder.
+    For relative imports, use the relative path to the file, making sure you use the correct filename (i.e., from step_1 import function, from step_2 import function, etc.).
     <PREVIOUS_STEPS_EXECUTION_SUMMARY>
     {previous_steps_execution_summary}
     -----------------------------------

@@ -11,12 +11,12 @@
     <img src="https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white&style=flat-square" alt="Join us on Discord" width="140"/>
 </a>
 
-Autonomous Research Backend, Powered by [AG2](https://github.com/ag2ai/ag2).
+Autonomous Research System, Powered by [AG2](https://github.com/ag2ai/ag2).
 
 🎉 **News**: Cmbagent won a **first place award** at the **NeurIPS 2025 [Fair Universe Competition](https://fair-universe.lbl.gov/)**.
 
 
-Cmbagent is the autonomous research backend for [Denario](https://astropilot-ai.github.io/DenarioPaperPage/), our end-to-end research system.
+Cmbagent is the autonomous research engine for [Denario](https://astropilot-ai.github.io/DenarioPaperPage/), our end-to-end research system.
 
 We are currently deploying cmbagent on the cloud, it will be in production soon!
 
@@ -59,18 +59,6 @@ python3 -m venv cmbagent_env
 source cmbagent_env/bin/activate
 pip install cmbagent
 ```
-
-Go ahead and launch the Next.js web UI:
-
-```bash
-cmbagent run
-```
-
-See below for other options including terminal usage, notebooks etc.
-
-### Lightweight Architecture
-
-The base `pip install cmbagent` is **lightweight** - it includes only orchestration dependencies (AG2, FastAPI, LLM clients). Heavy scientific packages (numpy, scipy, matplotlib, etc.) are **not required** on the server because code execution happens on the **frontend** (your local machine) via remote executor. Packages are installed on-demand by the installer agent into an isolated virtual environment.
 
 ### Optional Dependencies
 
@@ -161,134 +149,6 @@ export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account-key.json" ## opt
 For Windows, use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) and the same command.
 
 By default, cmbagent uses models from oai/anthropic/google. If you want to pick different LLMs, just adapt `agent_llm_configs` as above, or the `default_agent_llm_configs` in [utils.py](https://github.com/CMBAgents/cmbagent/blob/main/cmbagent/utils.py).
-
-## CMBAgent UI
-
-The web interface is maintained in a separate repository: **[cmbagent-ui](https://github.com/CMBAgents/cmbagent-ui)**
-
-### Quick Start
-
-1. **Start the backend** (this repo):
-```bash
-cd cmbagent/backend
-source your_venv/bin/activate
-python run.py
-```
-
-2. **Start the frontend** (separate repo):
-```bash
-git clone https://github.com/CMBAgents/cmbagent-ui.git
-cd cmbagent-ui
-npm install
-npm run dev
-```
-
-3. **Access the UI** at http://localhost:3000
-
-The UI supports multiple execution modes: One Shot, Planning & Control, Idea Generation, OCR, and more.
-
-### Architecture
-
-CMBAgent uses a **remote execution architecture**:
-- **Backend**: Lightweight orchestration - runs AI agents, generates code, manages conversations
-- **Frontend**: Executes generated code locally in an isolated Python virtual environment
-
-This means scientific computation happens on your local machine with full access to your data, while the backend can be deployed on minimal infrastructure.
-
-## Docker
-
-> **Note:** Docker configuration is being updated following the separation of the UI into its own repository. See [cmbagent-ui](https://github.com/CMBAgents/cmbagent-ui) for the latest frontend Docker setup.
-
-### CMBAgent UI (Next.js) with Docker
-
-**Docker Compose vs Docker Direct:**
-
-- **Docker Compose**: Orchestrates multiple services with a single command. Handles environment variables, port mapping, volumes, and service dependencies automatically via a configuration file (`docker-compose.yml`).
-- **Docker Direct**: Manual control over individual containers. Requires specifying all parameters (ports, environment variables, volumes) in command line arguments.
-
-**Using Docker Compose (Recommended):**
-
-1. **Set environment variables:**
-
-```bash
-export OPENAI_API_KEY="sk-..."
-export ANTHROPIC_API_KEY="sk-..."  # optional
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account-key.json"  # optional for Vertex AI
-```
-
-2. **Run with Docker Compose:**
-
-```bash
-docker compose up --build
-```
-
-3. **Access the UI:**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-
-**Using Docker directly:**
-
-```bash
-# Build the image
-docker build -f Dockerfile.nextjs -t cmbagent-nextjs .
-
-# Run the container (add --platform linux/amd64 for Apple Silicon Macs)
-docker run -p 3000:3000 -p 8000:8000 \
-  -e OPENAI_API_KEY="sk-..." \
-  -e ANTHROPIC_API_KEY="sk-..." \
-  -v /path/to/service-account-key.json:/app/service-account-key.json \
-  -e GOOGLE_APPLICATION_CREDENTIALS="/app/service-account-key.json" \
-  --rm cmbagent-nextjs
-```
-
-**Pushing to Docker Hub:**
-
-To build and push the CMBAgent UI image to Docker Hub for cross-platform compatibility:
-
-```bash
-# Login to Docker Hub
-docker login
-
-# Build and push Next.js UI image (multi-platform)
-docker buildx build --platform linux/amd64,linux/arm64 \
-  -f Dockerfile.nextjs \
-  -t docker.io/yourusername/cmbagent-ui:latest \
-  --no-cache --push .
-```
-
-Replace `yourusername` with your Docker Hub username. The `--platform` flag ensures compatibility across different architectures (Intel/AMD and ARM).
-
-**Using the published Docker Hub image:**
-
-The CMBAgent Next.js UI is available as a pre-built multi-platform image on Docker Hub. Simply pull and run:
-
-```bash
-# Pull and run the published image
-docker pull docker.io/borisbolliet/cmbagent-ui:latest
-
-# Option 1: Using environment variables (if already set)
-docker run -p 3000:3000 -p 8000:8000 \
-  -e OPENAI_API_KEY=$OPENAI_API_KEY \
-  -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY \
-  -v $GOOGLE_APPLICATION_CREDENTIALS:/app/service-account-key.json \
-  -e GOOGLE_APPLICATION_CREDENTIALS="/app/service-account-key.json" \
-  --rm docker.io/borisbolliet/cmbagent-ui:latest
-
-# Option 2: Direct key specification
-docker run -p 3000:3000 -p 8000:8000 \
-  -e OPENAI_API_KEY="your-openai-key-here" \
-  -e ANTHROPIC_API_KEY="your-anthropic-key-here" \
-  -v /path/to/service-account-key.json:/app/service-account-key.json \
-  -e GOOGLE_APPLICATION_CREDENTIALS="/app/service-account-key.json" \
-  --rm docker.io/borisbolliet/cmbagent-ui:latest
-```
-
-Access the UI at:
-
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
-
-**Note:** API keys are **not** included in the Docker image for security reasons. Each user must provide their own credentials at container runtime.
 
 ## References
 

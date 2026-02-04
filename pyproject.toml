@@ -11,15 +11,14 @@ build-backend = "setuptools.build_meta"
 version = "0.0.1post64"
 name = "cmbagent"
 maintainers = [{name = "CMBAgents", email = "boris.bolliet@cmbagent.community"}]
-description = "Autonomous research backend for scientific discovery across domains, powered by ag2"
+description = "Autonomous research system for scientific discovery across domains, powered by ag2"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.12"
 license = "Apache-2.0"
 
 # Core dependencies - orchestration only
 # Note: Scientific packages (numpy, scipy, etc.) are NOT required here
-# because code execution happens on the frontend via remote executor
-# Note: Server deps (fastapi, uvicorn, etc.) are in the [server] extra
+# because code execution happens on the client via remote executor
 dependencies = [
     # LLM clients
     "anthropic",
@@ -38,18 +37,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# FastAPI backend server
-server = [
-    "fastapi>=0.104.1",
-    "uvicorn[standard]>=0.24.0",
-    "websockets>=12.0",
-    "python-multipart>=0.0.6",
-    "python-dotenv>=1.0.0",
-    "firebase-admin>=6.2.0",
-    "google-cloud-firestore>=2.14.0",
-    "google-cloud-aiplatform>=1.38.0",
-]
-
 # Development and testing
 dev = [
     "pytest",
@@ -64,7 +51,7 @@ jupyter = [
     "jupyter-client>=8.6.0",
 ]
 
-# Local execution - install these if running code on the backend (not via frontend)
+# Local execution - install these if running code locally (not via frontend)
 # The frontend installs packages on-demand via the installer agent
 local = [
     "numpy>=1.24",
@@ -123,12 +110,6 @@ all = [
     "cmbagent[dev]",
 ]
 
-nextjs = [
-    # Note: The Next.js interface requires installation from source
-    # pip install does not include the Next.js frontend files
-    # Use: git clone + pip install -e . for Next.js support
-]
-
 [tool.setuptools.package-data]
 cmbagent = [
   "cmbagent/apis/*.json",
@@ -148,12 +129,6 @@ GitHub = "https://github.com/CMBAgents/cmbagent"
 [tool.setuptools.packages.find]
 include = ["cmbagent", "cmbagent.*"]
 
-[dependency-groups]
-dev = [
-    "nbstripout>=0.9.0",
-    "pre-commit>=4.5.1",
-]
-
 [project.scripts]
 cmbagent = "cmbagent.cli:main"
 
@@ -161,3 +136,10 @@ cmbagent = "cmbagent.cli:main"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 norecursedirs = ["legacy", ".ipynb_checkpoints"]
+
+
+[dependency-groups]
+dev = [
+    "nbstripout>=0.9.0",
+    "pre-commit>=4.5.1",
+]

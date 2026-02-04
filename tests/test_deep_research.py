@@ -6,16 +6,18 @@ def test_deep_research():
 
     task = r"""
     Compute the sum of the first 1000 natural numbers and then compute the factorial of 10.
+    plot the histogram of the numbers.
     """
 
     results = cmbagent.deep_research(
         task,
         max_rounds_control=100,
-        n_plan_reviews=1,
+        n_plan_reviews=0,
         max_n_attempts=2,
         max_plan_steps=3,
         # engineer_model="gemini-3-flash-preview",
-        engineer_model="gemini-2.5-flash",
+        # engineer_model="gemini-2.5-flash",
+        engineer_model="gpt-4.1",
         researcher_model="gpt-4.1-2025-04-14",
         plan_reviewer_model="claude-sonnet-4-20250514",
         plan_instructions=r"""
