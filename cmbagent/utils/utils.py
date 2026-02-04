@@ -6,6 +6,7 @@ import logging
 from ruamel.yaml import YAML
 from autogen.cmbagent_utils import cmbagent_debug
 from pathlib import Path
+import requests
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='[%(name)s] %(message)s')
@@ -281,4 +282,26 @@ def clean_llm_config(llm_config):
 
     if llm_config['config_list'][0]['api_type'] == 'google':
         if 'top_p' in llm_config:
-            llm_config.pop('top_p') 
+            llm_config.pop('top_p')
+
+def fetch_local_model_name(base_url: str, api_key: str) -> str:
+    """
+    Fetch the locally served model name using a request
+
+    Args:
+        base_url: The base url to target
+        api_key: The API key to use
+
+    Returns:
+        Model name as a string e.g. 'openai/gpt-oss-20b'
+    """
+    r = requests.get(
+        f"{base_url}/models",
+        headers={"Authorization": f"Bearer {api_key}"},
+        timeout=10,
+    )
+    r.raise_for_status()
+    models = r.json().get("data", [])
+    if not models:
+        raise RuntimeError("No models found at endpoint")
+    return models[0]["id"]
