@@ -1,0 +1,42 @@
+[
+  {
+    "Agent": "executor response formatter",
+    "Cost ($)": 0.0,
+    "Prompt Tokens": 488.0,
+    "Completion Tokens": 137.0,
+    "Total Tokens": 625.0,
+    "Model": "gpt-oss-120b"
+  },
+  {
+    "Agent": "engineer response formatter",
+    "Cost ($)": 0.0,
+    "Prompt Tokens": 2316.0,
+    "Completion Tokens": 1249.0,
+    "Total Tokens": 3565.0,
+    "Model": "gpt-oss-120b"
+  },
+  {
+    "Agent": "engineer",
+    "Cost ($)": 0.0,
+    "Prompt Tokens": 2186.0,
+    "Completion Tokens": 3542.0,
+    "Total Tokens": 5728.0,
+    "Model": "gpt-oss-120b"
+  },
+  {
+    "Agent": "controller",
+    "Cost ($)": 0.0,
+    "Prompt Tokens": 2307.0,
+    "Completion Tokens": 252.0,
+    "Total Tokens": 2559.0,
+    "Model": "gpt-oss-120b"
+  },
+  {
+    "Agent": "Total",
+    "Cost ($)": 0.0,
+    "Prompt Tokens": 7297.0,
+    "Completion Tokens": 5180.0,
+    "Total Tokens": 12477.0,
+    "Model": NaN
+  }
+]
